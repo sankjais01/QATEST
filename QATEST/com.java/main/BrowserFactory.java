@@ -10,17 +10,17 @@ public class BrowserFactory {
 	static WebDriver driver=null;
 
 	public static WebDriver createDriver(String type) {
-		if (type.contains("chrome")) {
+		if (type.contains("chrome") || type.contains("CHROME")) {
 			System.setProperty("webdriver.chrome.driver",
 					System.getProperty("user.dir") + "//com.lib//chrome//chromedriver.exe");
 			driver = new ChromeDriver();
-		} else if (type.contains("firefox")) {
+		} else if (type.contains("firefox") || type.contains("FIREFOX")) {
 			System.setProperty("webdriver.gecko.driver",
 					System.getProperty("user.dir") + "//com.lib//gecko//geckodriver.exe");
 			driver = new FirefoxDriver();
 		}
 
-		else if (type.contains("IE")) {
+		else if (type.contains("IE") || type.contains("ie")) {
 			System.setProperty("webdriver.ie.driver",
 					System.getProperty("user.dir") + "//com.lib//ie//IEDriverServer_x64_3.14.0//IEDriverServer.exe");
 			driver = new InternetExplorerDriver();

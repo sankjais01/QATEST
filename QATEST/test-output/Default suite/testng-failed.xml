@@ -5,7 +5,7 @@
     <classes>
       <class name="smoke.SmokeTest">
         <methods>
-          <include name="sliderVisibiltyTest"/>
+          <include name="homePageTest"/>
           <include name="destroyAll"/>
           <include name="init"/>
         </methods>
