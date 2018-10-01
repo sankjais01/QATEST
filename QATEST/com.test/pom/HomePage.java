@@ -16,8 +16,10 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
+import org.testng.asserts.SoftAssert;
 
 import locators.Locators;
+import net.bytebuddy.implementation.bytecode.ByteCodeAppender.Size;
 
 public class HomePage {
 
@@ -26,12 +28,32 @@ public class HomePage {
 	boolean sliderTwoflag = false;
 	boolean sliderThreeflag = false;
 	WebDriver driver;
+	String clickable_object[], clickable_object_url[];
+	SoftAssert softAssert = new SoftAssert();
 	// WebDriverWait wait = new WebDriverWait(driver, 10000);
 
 	public HomePage(WebDriver driver) {
 		this.driver = driver;
 		PageFactory.initElements(driver, this);
 		driver.get(Locators.HOMEPAGE_URL);
+		objectFecther();
+	}
+
+	// for fetching all clickable link object on current page
+
+	void objectFecther() {
+		int i = 0, count = countClickableLink();
+		clickable_object = new String[count];
+		clickable_object_url = new String[count];
+		for (WebElement webElement : clickableLinks) {
+			if (webElement.getText().length() > 0) {
+				if (!webElement.getAttribute("href").contains("?")) {
+					clickable_object[i] = webElement.getText();
+					clickable_object_url[i] = webElement.getAttribute("href");
+					i++;
+				}
+			}
+		}
 	}
 
 	@FindBy(xpath = Locators.SLIDERFRAME_XPATH)
@@ -58,31 +80,39 @@ public class HomePage {
 	@FindBy(xpath = Locators.HOMELOGO_XPATH)
 	WebElement HomeLogo;
 
-	List<WebElement> clickableLinks = driver.findElements(By.tagName("a"));
+	@FindBy(tagName = "a")
+	List<WebElement> clickableLinks;
+
+	// WebElement URLobject;
 
 	public int countClickableLink() {
 		int count = 0;
 		for (WebElement webElement : clickableLinks) {
 			if (webElement.getText().length() > 0) {
-				// System.out.println(webElement.getText());
-				count++;
+				if (!webElement.getAttribute("href").contains("?")) {
+					// System.out.println(webElement.getText());
+					count++;
+				}
 			}
 		}
 
 		return count;
 	}
 
-	public boolean checkCkickableLink() {
-		int size = countClickableLink();
-		String link[] = new String[size];
-		int i = 0;
-		for (WebElement webElement : clickableLinks) {
-			if (webElement.getText().length() > 0) {
-				link[i] = webElement.getAttribute("href");
-				i++;
-			}
-		}
+	public boolean checkClickableObject_URL() throws InterruptedException {
+		for (int j = 1; j <= clickable_object.length; j++) {
 
+			driver.findElement(By.linkText(clickable_object[j - 1])).click();
+			if (driver.getCurrentUrl().equalsIgnoreCase(clickable_object_url[j - 1])) {
+				softAssert.assertTrue(true);
+				System.out.println("clicking on " + clickable_object[j - 1]);
+			} else {
+				softAssert.assertTrue(false);
+				System.out.println(clickable_object[j - 1] + "- Object not clickable of - " + getClass());
+			}
+			driver.get(Locators.HOMEPAGE_URL);
+			Thread.sleep(500);
+		}
 		return flag;
 	}
 
