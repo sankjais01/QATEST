@@ -1,6 +1,8 @@
 package pom;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 
@@ -30,29 +32,40 @@ public class HomePage {
 	WebDriver driver;
 	String clickable_object[], clickable_object_url[];
 	SoftAssert softAssert = new SoftAssert();
+	String Parent_Window;
+
 	// WebDriverWait wait = new WebDriverWait(driver, 10000);
 
 	public HomePage(WebDriver driver) {
 		this.driver = driver;
 		PageFactory.initElements(driver, this);
 		driver.get(Locators.HOMEPAGE_URL);
+		Parent_Window = driver.getWindowHandle();
 		objectFecther();
 	}
 
 	// for fetching all clickable link object on current page
 
 	void objectFecther() {
-		int i = 0, count = countClickableLink();
-		clickable_object = new String[count];
-		clickable_object_url = new String[count];
-		for (WebElement webElement : clickableLinks) {
-			if (webElement.getText().length() > 0) {
-				if (!webElement.getAttribute("href").contains("?")) {
-					clickable_object[i] = webElement.getText();
-					clickable_object_url[i] = webElement.getAttribute("href");
-					i++;
+		try {
+			int i = 0, count = countClickableLink();
+			clickable_object = new String[count];
+			clickable_object_url = new String[count];
+			for (WebElement webElement : clickableLinks) {
+				if (webElement.getText().length() > 0) {
+					// this can be use to avoid links in new tab - !&&
+					// webElement.getAttribute("target").contains("_blank")
+					if (!webElement.getAttribute("href").contains("?")) {
+						clickable_object[i] = webElement.getText();
+						clickable_object_url[i] = webElement.getAttribute("href");
+						i++;
+					}
 				}
 			}
+		} catch (NoSuchElementException | IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.err.println(e);
 		}
 	}
 
@@ -93,6 +106,7 @@ public class HomePage {
 					// System.out.println(webElement.getText());
 					count++;
 				}
+				//count++;
 			}
 		}
 
@@ -100,15 +114,30 @@ public class HomePage {
 	}
 
 	public boolean checkClickableObject_URL() throws InterruptedException {
+		String C_Window = null;
+		System.out.println("Parent window -  " + Parent_Window);
 		for (int j = 1; j <= clickable_object.length; j++) {
-
 			driver.findElement(By.linkText(clickable_object[j - 1])).click();
+
+			for (String Child_Window : driver.getWindowHandles()) {
+				driver.switchTo().window(Child_Window);
+				C_Window = Child_Window;
+			}
+
 			if (driver.getCurrentUrl().equalsIgnoreCase(clickable_object_url[j - 1])) {
 				softAssert.assertTrue(true);
 				System.out.println("clicking on " + clickable_object[j - 1]);
+				if (!C_Window.equalsIgnoreCase(Parent_Window)) {
+					driver.close();
+
+				}
+
+				driver.switchTo().window(Parent_Window);
+
 			} else {
 				softAssert.assertTrue(false);
 				System.out.println(clickable_object[j - 1] + "- Object not clickable of - " + getClass());
+				driver.switchTo().window(Parent_Window);
 			}
 			driver.get(Locators.HOMEPAGE_URL);
 			Thread.sleep(500);

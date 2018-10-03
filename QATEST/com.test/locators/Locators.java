@@ -4,7 +4,7 @@ public class Locators {
 
 	// pages URL
 
-	public static final String HOMEPAGE_URL = "http://practice.automationtesting.in/";
+	public static final String HOMEPAGE_URL = "http://www.kalzoomadvisors.com/";
 	public static final String LOGINPAGE_URL = "";
 
 	// home page object Xpath
